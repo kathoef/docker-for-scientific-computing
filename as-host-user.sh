@@ -1,12 +1,20 @@
 #!/bin/bash
 
+# Author: Katharina Höflich <khoeflich_at_geomar.de>
+# Repository: https://github.com/kathoef/containers-for-scientific-computing/
+# License: See repository above.
+
+# References:
+# https://stackoverflow.com/questions/25292198/docker-how-can-i-copy-a-file-from-an-image-to-a-host
+#
+
 # Very simple usage instructions.
 
-echo "$@" | grep -e '--help' --quiet && \
+echo "$1" | grep -e '--help' --quiet && \
 echo "./as-host-user.sh --image [image] --command [docker run ...]" && exit
 
 # Verify that we are on a Linux machine.
-# This wrapper is not necessary on MacOS systems, as Docker volumes are mounted via NFS.
+# This wrapper is not necessary on MacOS systems, as Docker volumes are mounted via NFS and file permissions are already handled.
 # Not sure about Windows, but execution is prevented as well.
 
 echo $(uname -s) | grep -e "Linux" --quiet || { echo Not a Linux host machine... exiting.; exit; }
@@ -37,21 +45,21 @@ ORIGINAL_DOCKER_COMMAND="$@"
 echo Original command: ${ORIGINAL_DOCKER_COMMAND}
 echo Enable host user for: ${DOCKER_IMAGE}
 
-# Prepare temporary directory for merging the Linux system account information.
+# Prepare temporary directory for merging Linux system account information.
 
 TEMPDIR=$(mktemp -d $(pwd)/tmp.XXXXXXXX)
 echo Temporary directory: ${TEMPDIR}
 trap "echo Deleting: ${TEMPDIR}; rm -rf ${TEMPDIR}" 0
 
-# Extract existing Docker image account information and append (replace with) the user account information of the host system.
+# Merge Docker image account and host system user account information.
 
+# Extract Docker container image account information.
 id=$(docker create jupyter)
-# https://stackoverflow.com/questions/25292198/docker-how-can-i-copy-a-file-from-an-image-to-a-host
 docker cp $id:/etc/passwd ${TEMPDIR}/etc_passwd
 docker cp $id:/etc/group ${TEMPDIR}/etc_group
 docker rm $id
 
-# If UID is already existing, remove the container's user...
+# If the UID is already existing, remove the container's user.
 sed "/$(id -u ${USER})/d" $TEMPDIR/etc_passwd > $TEMPDIR/etc_passwd
 sed "/$(id -g ${USER})/d" $TEMPDIR/etc_group > $TEMPDIR/etc_group
 
