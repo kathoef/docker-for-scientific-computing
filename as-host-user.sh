@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Author: Katharina Höflich <khoeflich_at_geomar.de>
-# Repository: https://github.com/kathoef/containers-for-scientific-computing/
+# Repository: https://github.com/kathoef/portable-scientific-computing/
 # License: See repository above.
 
 # References:
