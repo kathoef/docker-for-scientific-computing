@@ -54,7 +54,7 @@ trap "echo Deleting: ${TEMPDIR}; rm -rf ${TEMPDIR}" 0
 # Merge Docker image account and host system user account information.
 
 # Extract Docker container image account information.
-id=$(docker create jupyter)
+id=$(docker create ${DOCKER_IMAGE})
 docker cp $id:/etc/passwd ${TEMPDIR}/etc_passwd
 docker cp $id:/etc/group ${TEMPDIR}/etc_group
 docker rm $id
